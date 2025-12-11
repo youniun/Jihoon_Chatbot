@@ -5,6 +5,13 @@ exports.handler = async (event, context) => {
     const API_KEY = process.env.OPENAI_API_KEY; // Netlify 환경변수에서 API 키 읽기
 
     if (!API_KEY) {
+      if (!API_KEY) {
+  return {
+    statusCode: 200,
+    body: JSON.stringify({ test: "API_KEY is missing in Netlify" })
+  };
+}
+
       return {
         statusCode: 500,
         body: JSON.stringify({ error: "OPENAI_API_KEY 환경변수가 설정되지 않았습니다." })
