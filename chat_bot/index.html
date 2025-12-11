@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>서울 맛집 & 놀거리 챗봇</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background-color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      color: #111827;
+    }
+
+    .chat-container {
+      width: 460px;
+      max-width: 100%;
+      height: 640px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .chat-header {
+      background: #111827;
+      color: #f9fafb;
+      padding: 14px 18px;
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .chat-header span.sub {
+      font-size: 12px;
+      font-weight: 400;
+      color: #9ca3af;
+      margin-left: 8px;
+    }
+
+    #chatbox {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      font-size: 14px;
+      background: #f9fafb;
+    }
+
+    .msg {
+      margin-bottom: 8px;
+    }
+
+    .msg.user {
+      text-align: right;
+    }
+
+    .msg.bot {
+      text-align: left;
+    }
+
+    .msg span.label {
+      font-size: 11px;
+      color: #6b7280;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .msg.user span.label {
+      color: #4b5563;
+    }
+
+    .bubble {
+      display: inline-block;
+      padding: 8px 11px;
+      border-radius: 12px;
+      max-width: 85%;
+      text-align: left;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: keep-all;
+    }
+
+    .msg.user .bubble {
+      background: #2563eb;
+      color: #f9fafb;
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg.bot .bubble {
+      background: #e5e7eb;
+      color: #111827;
+      border-bottom-left-radius: 4px;
+    }
+
+    /* 지역 버튼 */
+    .region-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 10px;
+      background: #f3f4f6;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .region-btn {
+      flex: 1 0 30%;
+      padding: 6px 8px;
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      color: #111827;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.05s;
+      white-space: nowrap;
+    }
+
+    .region-btn:hover {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+      transform: translateY(-1px);
+    }
+
+    .region-btn.hall-of-fame {
+      border-color: #f59e0b;
+      color: #92400e;
+      background: #fffbeb;
+    }
+
+    .region-btn.hall-of-fame:hover {
+      background: #f59e0b;
+      color: #111827;
+      border-color: #f59e0b;
+    }
+
+    /* 카테고리 버튼 */
+    #category-container {
+      border-top: 1px solid #e5e7eb;
+      background: #eef2ff;
+    }
+
+    .category-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 8px 10px;
+    }
+
+    .category-btn {
+      flex: 1 0 30%;
+      padding: 6px 8px;
+      border: none;
+      background: #4f46e5;
+      color: #f9fafb;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      text-align: center;
+      transition: background 0.15s, transform 0.05s;
+      white-space: nowrap;
+    }
+
+    .category-btn:hover {
+      background: #4338ca;
+      transform: translateY(-1px);
+    }
+
+    /* 입력 영역 */
+    .input-area {
+      display: flex;
+      border-top: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    #input {
+      flex: 1;
+      border: none;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      background: transparent;
+    }
+
+    #send {
+      border: none;
+      background: #111827;
+      color: white;
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+      border-left: 1px solid #e5e7eb;
+      transition: background 0.15s;
+    }
+
+    #send:hover {
+      background: #1f2937;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <div>
+        서울 맛집 & 놀거리 챗봇
+        <span class="sub">지훈이 큐레이션 기반</span>
+      </div>
+    </div>
+
+    <div id="chatbox"></div>
+
+    <!-- 지역 버튼 -->
+    <div class="region-buttons">
+      <button class="region-btn" data-area="경희대, 외대">경희대·외대</button>
+      <button class="region-btn" data-area="건대">건대</button>
+      <button class="region-btn" data-area="성수, 뚝섬">성수·뚝섬</button>
+      <button class="region-btn" data-area="홍대, 합정">홍대·합정</button>
+      <button class="region-btn" data-area="혜화">혜화</button>
+      <button class="region-btn" data-area="을지로">을지로</button>
+      <button class="region-btn" data-area="용산">용산</button>
+      <button class="region-btn" data-area="압구정">압구정</button>
+      <button class="region-btn" data-area="종각">종각</button>
+      <button class="region-btn" data-area="잠실">잠실</button>
+      <button class="region-btn hall-of-fame" data-area="명예의 전당">⭐ 명예의 전당</button>
+    </div>
+
+    <!-- 카테고리 버튼 -->
+    <div id="category-container"></div>
+
+    <!-- 입력창 -->
+    <div class="input-area">
+      <input id="input" placeholder="예: 외대 근처 데이트 식당 추천해줘" />
+      <button id="send">전송</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
